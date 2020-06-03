@@ -1,0 +1,121 @@
+{
+  "name": "BoTest",
+  "version": "0.0.1",
+  "private": true,
+  "scripts": {
+    "prettier:write": "prettier --write src/*.{js,jsx,ts,tsx,json} && prettier --write src/**/*.{js,jsx,ts,tsx,json} && prettier --write src/**/**/*.{js,jsx,ts,tsx,json}",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx ./",
+    "lint:fix": "eslint --ext .js,.jsx,.ts,.tsx ./ --fix",
+    "android": "react-native run-android",
+    "ios": "react-native run-ios",
+    "start": "react-native start",
+    "test": "jest"
+  },
+  "dependencies": {
+    "apisauce": "^1.1.1",
+    "currency-formatter": "^1.5.5",
+    "enzyme": "^3.11.0",
+    "enzyme-adapter-react-16": "^1.15.2",
+    "immutable": "^4.0.0-rc.12",
+    "react": "^16.13.1",
+    "react-lifecycles-compat": "^3.0.4",
+    "react-native": "0.61.5",
+    "react-native-gesture-handler": "^1.6.1",
+    "react-native-iphone-x-helper": "^1.2.1",
+    "react-native-masked-text": "^1.13.0",
+    "react-native-modal": "^11.5.6",
+    "react-native-svg": "^12.1.0",
+    "react-redux": "^7.2.0",
+    "redux": "^4.0.5",
+    "redux-devtools-extension": "^2.13.8",
+    "redux-form": "^8.3.6",
+    "redux-saga": "^1.1.3",
+    "reselect": "^4.0.0",
+    "typesafe-actions": "^5.1.0"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.10.2",
+    "@babel/runtime": "^7.10.2",
+    "@react-native-community/eslint-config": "0.0.7",
+    "@types/currency-formatter": "^1.3.0",
+    "@types/enzyme": "^3.10.5",
+    "@types/enzyme-adapter-react-16": "^1.0.6",
+    "@types/jest": "^24.9.1",
+    "@types/react": "^16.9.35",
+    "@types/react-native": "^0.60.25",
+    "@types/react-redux": "^7.1.9",
+    "@types/react-test-renderer": "^16.9.2",
+    "@types/redux-form": "^8.2.6",
+    "@typescript-eslint/eslint-plugin": "^2.19.2",
+    "@typescript-eslint/parser": "^2.19.2",
+    "babel-jest": "^24.9.0",
+    "eslint": "^5.16.0",
+    "eslint-config-airbnb": "^18.1.0",
+    "eslint-config-airbnb-typescript": "^7.2.1",
+    "eslint-config-prettier": "^6.11.0",
+    "eslint-import-resolver-typescript": "^2.0.0",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-jsx-a11y": "^6.2.3",
+    "eslint-plugin-prettier": "^3.1.3",
+    "eslint-plugin-react": "^7.20.0",
+    "eslint-plugin-react-native": "^3.8.1",
+    "husky": "^4.2.5",
+    "jest": "^24.9.0",
+    "lint-staged": "^10.2.7",
+    "metro-react-native-babel-preset": "^0.56.0",
+    "prettier": "^1.19.1",
+    "pretty-quick": "^2.0.1",
+    "react-dom": "^16.13.1",
+    "react-test-renderer": "^16.13.1",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.9.3"
+  },
+  "jest": {
+    "preset": "react-native",
+    "transform": {
+      "^.+\\.js$": "<rootDir>/node_modules/react-native/jest/preprocessor.js",
+      "^.+\\.tsx?$": "ts-jest"
+    },
+    "transformIgnorePatterns": [
+      "node_modules/(?!(jest-)?react-native|@?react-navigation)"
+    ],
+    "globals": {
+      "ts-jest": {
+        "tsConfig": "tsconfig.jest.json"
+      }
+    },
+    "testRegex": "(/__tests__/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
+    "moduleFileExtensions": [
+      "ts",
+      "tsx",
+      "js",
+      "jsx",
+      "json",
+      "node"
+    ],
+    "modulePaths": [
+      "<rootDir>"
+    ],
+    "setupFiles": [
+      "./src/setupTests.ts"
+    ],
+    "reporters": [
+      "default"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged && npm test",
+      "pre-push": "npm test"
+    }
+  },
+  "lint-staged": {
+    "*.{json,md,scss}": [
+      "prettier"
+    ],
+    "*.{js,jsx,ts,tsx}": [
+      "eslint",
+      "prettier"
+    ]
+  }
+}
