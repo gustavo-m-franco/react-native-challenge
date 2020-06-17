@@ -30,6 +30,7 @@ To run the tests: npm run test
 
 Enhancements:
 =============
+* SVGs
 * React hooks
 * Thunks
 * UTs

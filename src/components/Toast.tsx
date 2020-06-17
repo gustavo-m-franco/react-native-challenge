@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
@@ -14,49 +14,38 @@ import { colors } from '../assets';
 import CloseIcon from '../assets/icons/CloseIcon';
 import { NotificationTypes } from '../store/notification';
 
-export class ToastComponent extends React.Component<
-  IToastProps,
-  { bounceValue: Animated.Value }
-> {
-  constructor(props: IToastProps) {
-    super(props);
-
-    // Set up slide-in animation
-    const bounce = new Animated.Value(0);
-    this.state = { bounceValue: bounce };
-  }
-
-  public animateNotification(show: boolean) {
-    this.state.bounceValue.setValue(show ? 0 : 100);
-    const toValue = show ? 100 : 0;
-
+const ToastComponent: React.FunctionComponent<IToastProps> = ({
+  show,
+  type,
+  hide,
+  title,
+  message,
+}) => {
+  const bounceValue = new Animated.Value(0);
+  const animateNotification = (showArg: boolean) => {
+    bounceValue.setValue(showArg ? 0 : 100);
+    const toValue = showArg ? 100 : 0;
     // This will animate the transalteY of the subview between 0 & 100 depending on its current state
     // 100 comes from the style below, which is the height of the subview.
-    Animated.timing(this.state.bounceValue, {
+    Animated.timing(bounceValue, {
       toValue,
       duration: 400,
       easing: Easing.linear,
     }).start();
-  }
+    showArg && setTimeout(hide, 3000);
+  };
+  useEffect(() => {
+    animateNotification(show);
+  }, [show]);
 
-  public componentDidUpdate(prevProps: IToastProps) {
-    const { show } = this.props;
-    if (show && !prevProps.show) {
-      this.animateNotification(true);
-    }
-    show && setTimeout(this.hide, 3000);
-  }
-
-  private hide = () => {
-    const { hide, show } = this.props;
+  const startHide = () => {
     if (show) {
-      this.animateNotification(false);
+      animateNotification(false);
       hide();
     }
   };
 
-  private getBackgroundColor = () => {
-    const { type } = this.props;
+  const getBackgroundColor = () => {
     switch (type) {
       case NotificationTypes.ERROR:
         return colors.red;
@@ -66,45 +55,35 @@ export class ToastComponent extends React.Component<
         return colors.brandYellow;
     }
   };
-
-  public render() {
-    const { title, message } = this.props;
-    return (
-      <Animated.View
-        style={[
-          styles.holder,
-          { transform: [{ translateY: this.state.bounceValue }] },
-        ]}
+  return (
+    <Animated.View
+      style={[styles.holder, { transform: [{ translateY: bounceValue }] }]}
+    >
+      <FlingGestureHandler
+        direction={Directions.UP}
+        onHandlerStateChange={startHide}
       >
-        <FlingGestureHandler
-          direction={Directions.UP}
-          onHandlerStateChange={this.hide}
+        <View
+          style={[styles.container, { backgroundColor: getBackgroundColor() }]}
         >
-          <View
-            style={[
-              styles.container,
-              { backgroundColor: this.getBackgroundColor() },
-            ]}
-          >
-            <View style={styles.notification}>
-              {title && (
-                <Text onPress={this.hide} style={styles.title}>
-                  {title}
-                </Text>
-              )}
-              <Text onPress={this.hide} style={styles.text}>
-                {message}
+          <View style={styles.notification}>
+            {title && (
+              <Text onPress={startHide} style={styles.title}>
+                {title}
               </Text>
-            </View>
-            <TouchableOpacity onPress={this.hide}>
-              <CloseIcon style={styles.closeIcon} />
-            </TouchableOpacity>
+            )}
+            <Text onPress={startHide} style={styles.text}>
+              {message}
+            </Text>
           </View>
-        </FlingGestureHandler>
-      </Animated.View>
-    );
-  }
-}
+          <TouchableOpacity onPress={startHide}>
+            <CloseIcon style={styles.closeIcon} />
+          </TouchableOpacity>
+        </View>
+      </FlingGestureHandler>
+    </Animated.View>
+  );
+};
 
 const styles = StyleSheet.create({
   holder: {

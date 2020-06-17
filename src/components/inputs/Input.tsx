@@ -6,42 +6,39 @@ import Error from './Error';
 import { colors } from '../../assets';
 import { CURRENCY_SYMBOL } from '../../services/format';
 
-class Input extends React.PureComponent<IInputProps, {}> {
-  public render() {
-    const {
-      label,
-      placeholder,
-      input,
-      meta,
-      isNumeric,
-      style,
-      ...inputProps
-    } = this.props;
-    const displayError = meta.invalid && meta.touched;
-    return (
-      <View style={style}>
-        <View style={styles.container}>
-          <View style={{ flexDirection: 'row' }}>
-            <Text style={styles.label}>{label}</Text>
-          </View>
-          {displayError && <Error errorMessage={meta.error} />}
-          <TextInput
-            selectTextOnFocus={false}
-            contextMenuHidden
-            placeholderTextColor={colors.darkGrey}
-            style={[styles.input, displayError && styles.onError]}
-            placeholder={placeholder}
-            onChangeText={input.onChange}
-            onBlur={input.onBlur}
-            value={input.value}
-            {...inputProps}
-          />
-          {isNumeric && <Text style={styles.pounds}>{CURRENCY_SYMBOL}</Text>}
+const Input: React.FunctionComponent<IInputProps> = ({
+  label,
+  placeholder,
+  input,
+  meta,
+  isNumeric,
+  style,
+  ...inputProps
+}) => {
+  const displayError = meta.invalid && meta.touched;
+  return (
+    <View style={style}>
+      <View style={styles.container}>
+        <View style={{ flexDirection: 'row' }}>
+          <Text style={styles.label}>{label}</Text>
         </View>
+        {displayError && <Error errorMessage={meta.error} />}
+        <TextInput
+          selectTextOnFocus={false}
+          contextMenuHidden
+          placeholderTextColor={colors.darkGrey}
+          style={[styles.input, displayError && styles.onError]}
+          placeholder={placeholder}
+          onChangeText={input.onChange}
+          onBlur={input.onBlur}
+          value={input.value}
+          {...inputProps}
+        />
+        {isNumeric && <Text style={styles.pounds}>{CURRENCY_SYMBOL}</Text>}
       </View>
-    );
-  }
-}
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
