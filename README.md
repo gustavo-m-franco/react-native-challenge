@@ -27,3 +27,12 @@ To run the app just run:
 * npm run ios / npm run android
 
 To run the tests: npm run test
+
+Enhancements:
+=============
+* React hooks
+* Thunks
+* UTs
+* Integration tests
+* Test hooks
+* Test sagas

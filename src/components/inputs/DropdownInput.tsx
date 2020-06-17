@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
 import { WrappedFieldProps } from 'redux-form';
 
@@ -7,98 +7,89 @@ import LeftChevron from '../../assets/icons/LeftChevron';
 import DropdownOptions from './DropdownOptions';
 import Error from './Error';
 
-export class DropdownInputComponent extends React.PureComponent<
-  IDropdownInputProps,
-  IDropdownInputState
-> {
-  private view?: View;
-  constructor(props: IDropdownInputProps) {
-    super(props);
-    this.state = {
-      showOptions: false,
-      positionY: 200,
-    };
-  }
+export const DropdownInputComponent: React.FC<IDropdownInputProps> = ({
+  label,
+  placeholder,
+  input,
+  meta,
+  options,
+}) => {
+  const view = useRef<View | undefined>(undefined) as React.MutableRefObject<
+    View
+  >;
+  const [showOptions, setShowOptions] = useState(false);
+  const [posY, setPosY] = useState(200);
+  const [callback, setCallback] = useState<(() => void) | undefined>(undefined);
 
-  private measure = (callback: () => void) => {
-    if (this.view) {
-      this.view.measureInWindow((x, positionY) => {
+  useEffect(() => {
+    callback && callback();
+  }, [showOptions, posY]);
+
+  const measure = () => {
+    if (view.current) {
+      view.current.measureInWindow((x, positionY) => {
         if (positionY) {
-          this.setState({ positionY: positionY + 30 }, callback);
+          setPosY(positionY + 30);
         }
       });
     } else {
-      callback();
+      callback && callback();
     }
   };
 
-  private referenceView = (view: View) => {
-    this.view = view;
-  };
-
-  private showOptions = () => {
-    const { onFocus } = this.props.input;
-    this.measure(() => {
-      this.setState({ showOptions: true }, () => {
-        // @ts-ignore
-        onFocus();
-      });
-    });
-  };
-
-  private hideOptions = () => {
-    const { onBlur } = this.props.input;
-    this.setState({ showOptions: false }, () => {
+  const showOptionsDrop = () => {
+    const { onFocus } = input;
+    setCallback(() => {
+      setShowOptions(true);
       // @ts-ignore
-      onBlur();
+      setCallback(onFocus);
     });
+    measure();
   };
 
-  private selectOption = (selectedOption: string) => {
-    const { input } = this.props;
+  const hideOptions = () => {
+    const { onBlur } = input;
+    setShowOptions(false);
+    // @ts-ignore
+    setCallback(onBlur);
+  };
+
+  const selectOption = (selectedOption: string) => {
     input.onChange(selectedOption);
   };
 
-  public render() {
-    const { showOptions, positionY } = this.state;
-    const { label, placeholder, input, meta, options } = this.props;
-    const displayError = meta.invalid && meta.touched;
-    return (
-      <View
-        ref={this.referenceView}
-        style={styles.container}
-        collapsable={false}
-      >
-        <DropdownOptions
-          select={this.selectOption}
-          options={options}
-          close={this.hideOptions}
-          showOptions={showOptions}
-          positionY={positionY + (displayError ? 30 : 0)}
-        />
-        <Text style={styles.label}>{label}</Text>
-        {displayError && <Error errorMessage={meta.error} />}
-        <TouchableOpacity onPress={this.showOptions}>
-          <View
-            style={[
-              styles.input,
-              showOptions && styles.active,
-              displayError && styles.onError,
-            ]}
+  const displayError = meta.invalid && meta.touched;
+  return (
+    <View ref={view} style={styles.container} collapsable={false}>
+      <DropdownOptions
+        select={selectOption}
+        options={options}
+        close={hideOptions}
+        showOptions={showOptions}
+        positionY={posY + (displayError ? 30 : 0)}
+      />
+      <Text style={styles.label}>{label}</Text>
+      {displayError && <Error errorMessage={meta.error} />}
+      <TouchableOpacity onPress={showOptionsDrop}>
+        <View
+          style={[
+            styles.input,
+            showOptions && styles.active,
+            displayError && styles.onError,
+          ]}
+        >
+          <Text
+            testID="value"
+            style={[styles.text, !input.value && styles.placeholder]}
           >
-            <Text
-              testID="value"
-              style={[styles.text, !input.value && styles.placeholder]}
-            >
-              {input.value ? input.value : placeholder}
-            </Text>
-          </View>
-        </TouchableOpacity>
-        <LeftChevron top={displayError ? 82 : 52} style={styles.chevron} />
-      </View>
-    );
-  }
-}
+            {input.value ? input.value : placeholder}
+          </Text>
+        </View>
+      </TouchableOpacity>
+      <LeftChevron top={displayError ? 82 : 52} style={styles.chevron} />
+    </View>
+  );
+};
 
 const styles = StyleSheet.create({
   container: {
@@ -140,12 +131,6 @@ const styles = StyleSheet.create({
     borderLeftWidth: 3,
   },
 });
-
-export interface IDropdownInputState {
-  showOptions: boolean;
-  selectedOption?: string;
-  positionY: number;
-}
 
 export interface IDropdownValues {
   [key: string]: string;
