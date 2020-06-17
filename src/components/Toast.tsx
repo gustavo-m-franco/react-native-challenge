@@ -22,6 +22,9 @@ const ToastComponent: React.FunctionComponent<IToastProps> = ({
   message,
 }) => {
   const bounceValue = new Animated.Value(0);
+  useEffect(() => {
+    animateNotification(show);
+  }, [show]);
   const animateNotification = (showArg: boolean) => {
     bounceValue.setValue(showArg ? 0 : 100);
     const toValue = showArg ? 100 : 0;
@@ -34,9 +37,6 @@ const ToastComponent: React.FunctionComponent<IToastProps> = ({
     }).start();
     showArg && setTimeout(hide, 3000);
   };
-  useEffect(() => {
-    animateNotification(show);
-  }, [show]);
 
   const startHide = () => {
     if (show) {

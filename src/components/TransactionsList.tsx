@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import {
   StyleSheet,
   Text,
@@ -13,20 +13,25 @@ import {
 } from 'react-native';
 
 import { colors } from '../assets';
-import { ITransaction } from '../services/api/index';
+import { ITransaction } from '../services/api';
 import { ITransactionsMap } from '../store/transactions/types';
 
-class TransactionsList extends React.PureComponent<ITransactionsListProps> {
-  public componentDidMount() {
-    const { getTransactions } = this.props;
+const TransactionsList: React.FC<ITransactionsListProps> = ({
+  getTransactions,
+  transactions,
+  onScroll,
+  onScrollEnd,
+  isLoading,
+}) => {
+  useEffect(() => {
     getTransactions();
     if (Platform.OS === 'android') {
       UIManager.setLayoutAnimationEnabledExperimental &&
         UIManager.setLayoutAnimationEnabledExperimental(true);
     }
-  }
+  }, []);
 
-  private renderItem = ({ item }: ListRenderItemInfo<ITransaction>) => {
+  const renderItem = ({ item }: ListRenderItemInfo<ITransaction>) => {
     return (
       <View
         style={{
@@ -42,9 +47,8 @@ class TransactionsList extends React.PureComponent<ITransactionsListProps> {
     );
   };
 
-  private keyExtractor = (item: ITransaction) => item.id.toString();
-  private getTransactions = () => {
-    const { transactions } = this.props;
+  const keyExtractor = (item: ITransaction) => item.id.toString();
+  const processTransactions = () => {
     const transactionsList: ITransaction[] = [];
     Object.keys(transactions).forEach((key: string) => {
       transactionsList.push(transactions[Number(key)]);
@@ -53,30 +57,27 @@ class TransactionsList extends React.PureComponent<ITransactionsListProps> {
     return transactionsList;
   };
 
-  public render() {
-    const { onScroll, onScrollEnd, isLoading } = this.props;
-    return (
-      <View style={styles.container}>
-        {isLoading && (
-          <ActivityIndicator style={{ marginTop: 10 }} size="large" />
-        )}
-        <FlatList
-          removeClippedSubviews={false}
-          bounces={false}
-          onScroll={onScroll}
-          onScrollEndDrag={onScrollEnd}
-          onMomentumScrollEnd={onScrollEnd}
-          keyExtractor={this.keyExtractor}
-          style={styles.listContainer}
-          contentContainerStyle={{ paddingHorizontal: 16 }}
-          renderItem={this.renderItem}
-          data={this.getTransactions()}
-          refreshing={isLoading}
-        />
-      </View>
-    );
-  }
-}
+  return (
+    <View style={styles.container}>
+      {isLoading && (
+        <ActivityIndicator style={{ marginTop: 10 }} size="large" />
+      )}
+      <FlatList
+        removeClippedSubviews={false}
+        bounces={false}
+        onScroll={onScroll}
+        onScrollEndDrag={onScrollEnd}
+        onMomentumScrollEnd={onScrollEnd}
+        keyExtractor={keyExtractor}
+        style={styles.listContainer}
+        contentContainerStyle={{ paddingHorizontal: 16 }}
+        renderItem={renderItem}
+        data={processTransactions()}
+        refreshing={isLoading}
+      />
+    </View>
+  );
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,

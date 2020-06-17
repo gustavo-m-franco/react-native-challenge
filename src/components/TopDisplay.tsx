@@ -5,7 +5,6 @@ import {
   Text,
   TouchableWithoutFeedback,
   Animated,
-  PanResponderInstance,
   PanResponder,
   TouchableOpacity,
 } from 'react-native';
@@ -18,118 +17,105 @@ import PlusIcon from '../assets/icons/PlusIcon';
 import RefreshIcon from '../assets/icons/RefreshIcon';
 import { Screen } from '../App';
 
-export class TopDisplay extends React.Component<
-  PropsWithChildren<ITopDisplayProps>,
-  ITopDisplayState
-> {
-  private panResponder: PanResponderInstance;
-  constructor(props: ITopDisplayProps) {
-    super(props);
-    this.state = {
-      pan: new Animated.ValueXY(),
-      scaleX: new Animated.Value(1),
-      scaleY: new Animated.Value(1),
-    };
-    const panMover = Animated.event([
-      null,
-      {
-        dy: this.state.pan.y,
-      },
-    ]);
-    const maxDrag = 170;
-    this.panResponder = PanResponder.create({
-      onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 0,
-      onPanResponderMove: (_, gesture) => {
-        if (gesture.dy < 0 || gesture.dy > maxDrag) {
-          return false;
-        }
-        this.state.scaleX.setValue(1 + gesture.dy / maxDrag);
-        this.state.scaleY.setValue(1 + gesture.dy / maxDrag);
-        // tslint:disable-next-line: no-void-expression
-        return panMover(_, gesture);
-      },
-      onPanResponderRelease: (e, gesture) => {
-        Animated.parallel([
-          Animated.spring(this.state.pan, { toValue: { x: 0, y: 0 } }),
-          Animated.spring(this.state.scaleX, { toValue: 1 }),
-          Animated.spring(this.state.scaleY, { toValue: 1 }),
-        ]).start();
-      },
-    });
-  }
+export const TopDisplay: React.FC<PropsWithChildren<ITopDisplayProps>> = ({
+  collapsed,
+  isAtTop,
+  onPress,
+  children,
+  onPressRefresh,
+  balance,
+  changeScreen,
+}) => {
+  const pan = new Animated.ValueXY();
+  const scaleX = new Animated.Value(1);
+  const scaleY = new Animated.Value(1);
+  const panMover = Animated.event([
+    null,
+    {
+      dy: pan.y,
+    },
+  ]);
+  const maxDrag = 170;
+  const panResponder = PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 0,
+    onPanResponderMove: (_, gesture) => {
+      if (gesture.dy < 0 || gesture.dy > maxDrag) {
+        return false;
+      }
+      scaleX.setValue(1 + gesture.dy / maxDrag);
+      scaleY.setValue(1 + gesture.dy / maxDrag);
+      // tslint:disable-next-line: no-void-expression
+      return panMover(_, gesture);
+    },
+    onPanResponderRelease: () => {
+      Animated.parallel([
+        Animated.spring(pan, { toValue: { x: 0, y: 0 } }),
+        Animated.spring(scaleX, { toValue: 1 }),
+        Animated.spring(scaleY, { toValue: 1 }),
+      ]).start();
+    },
+  });
 
-  private onPressAdd = () => {
-    const { changeScreen } = this.props;
+  const onPressAdd = () => {
     changeScreen(Screen.ADD_TRANSACTION_SCREEN);
   };
 
-  public render() {
-    const {
-      collapsed,
-      isAtTop,
-      onPress,
-      children,
-      onPressRefresh,
-      balance,
-    } = this.props;
-    const panStyle = {
-      transform: this.state.pan.getTranslateTransform(),
-    };
-    const { scaleX, scaleY } = this.state;
-    return (
-      <View style={[styles.container, collapsed && styles.collapsedContainer]}>
-        <View style={styles.topLeftButtonContainer}>
-          <TouchableOpacity
-            testID="refresh"
-            style={styles.topButton}
-            onPress={onPressRefresh}
-          >
-            <RefreshIcon />
-          </TouchableOpacity>
-        </View>
-        <View style={styles.topRightButtonContainer}>
-          <TouchableOpacity
-            testID="add"
-            style={styles.topButton}
-            onPress={this.onPressAdd}
-          >
-            <PlusIcon />
-          </TouchableOpacity>
-        </View>
-        <Animated.Image
-          style={[
-            styles.backgroundImage,
-            { transform: [{ scaleX }, { scaleY }] },
-          ]}
-          source={images.bo}
-        />
-        <Animated.View
-          style={[
-            styles.detailsContainer,
-            collapsed && styles.collapsedDetailsContainer,
-            !collapsed && panStyle,
-          ]}
-          {...(!collapsed && isAtTop ? this.panResponder.panHandlers : {})}
+  const panStyle = {
+    transform: pan.getTranslateTransform(),
+  };
+  return (
+    <View style={[styles.container, collapsed && styles.collapsedContainer]}>
+      <View style={styles.topLeftButtonContainer}>
+        <TouchableOpacity
+          testID="refresh"
+          style={styles.topButton}
+          onPress={onPressRefresh}
         >
-          <TouchableWithoutFeedback onPress={onPress}>
-            <View>
-              <View style={collapsed ? styles.collapsedHeader : styles.header}>
-                <Text style={styles.title}>Balance</Text>
-                <View style={styles.balanceContainer}>
-                  <Balance
-                    style={!collapsed ? styles.balance : undefined}
-                    balance={balance}
-                  />
-                </View>
+          <RefreshIcon />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.topRightButtonContainer}>
+        <TouchableOpacity
+          testID="add"
+          style={styles.topButton}
+          onPress={onPressAdd}
+        >
+          <PlusIcon />
+        </TouchableOpacity>
+      </View>
+      <Animated.Image
+        style={[
+          styles.backgroundImage,
+          { transform: [{ scaleX }, { scaleY }] },
+        ]}
+        source={images.bo}
+      />
+      <Animated.View
+        style={[
+          styles.detailsContainer,
+          collapsed && styles.collapsedDetailsContainer,
+          !collapsed && panStyle,
+        ]}
+        {...(!collapsed && isAtTop ? panResponder.panHandlers : {})}
+      >
+        <TouchableWithoutFeedback onPress={onPress}>
+          <View>
+            <View style={collapsed ? styles.collapsedHeader : styles.header}>
+              <Text style={styles.title}>Balance</Text>
+              <View style={styles.balanceContainer}>
+                <Balance
+                  style={!collapsed ? styles.balance : undefined}
+                  balance={balance}
+                />
               </View>
             </View>
-          </TouchableWithoutFeedback>
-          {children}
-        </Animated.View>
-      </View>
-    );
-  }
-}
+          </View>
+        </TouchableWithoutFeedback>
+        {children}
+      </Animated.View>
+    </View>
+  );
+};
 const collapsedHeight = ifIphoneX(125, 100);
 const styles = StyleSheet.create({
   container: {
@@ -153,7 +139,7 @@ const styles = StyleSheet.create({
     height: 48,
   },
   topLeftButtonContainer: {
-    zIndex: 100,
+    zIndex: 1000,
     top: collapsedHeight - 78,
     left: 16,
     position: 'absolute',
@@ -265,12 +251,6 @@ export interface ITopDisplayProps {
   onPress: () => void;
   onPressRefresh: () => void;
   changeScreen: (screen: Screen) => void;
-}
-
-export interface ITopDisplayState {
-  pan: Animated.ValueXY;
-  scaleX: Animated.Value;
-  scaleY: Animated.Value;
 }
 
 export default TopDisplay;

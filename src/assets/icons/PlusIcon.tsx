@@ -1,6 +1,7 @@
 import React from 'react';
 import Svg, { G, Path } from 'react-native-svg';
 import { IIcon } from './types';
+import { colors } from '../index';
 
 export const PlusIcon: React.FunctionComponent<IIcon> = ({
   style,
@@ -12,6 +13,8 @@ export const PlusIcon: React.FunctionComponent<IIcon> = ({
     height={32 * size}
     viewBox="0 0 330 330"
     style={style}
+    opacity={1}
+    fill={colors.textColor}
   >
     <G>
       <Path

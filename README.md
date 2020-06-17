@@ -30,8 +30,13 @@ To run the tests: npm run test
 
 Enhancements:
 =============
-* SVGs
-* React hooks
+* (DONE) SVGs
+* (DONE) React hooks
+* WalletScreen refactor interaction 
+* extract functions out of scope to prevent rerenders
+* Redux hooks
+* Hooks typescript
+* Update npm
 * Thunks
 * UTs
 * Integration tests

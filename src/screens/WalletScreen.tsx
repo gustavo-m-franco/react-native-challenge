@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   StyleSheet,
   View,
@@ -28,127 +28,111 @@ import { ITransactionsMap } from '../store/transactions/types';
 import TransactionsList from '../components/TransactionsList';
 import { Screen } from '../App';
 
-class WalletScreen extends React.Component<
-  IWalletScreenProps,
-  IWalletScreenState
-> {
-  constructor(props: IWalletScreenProps) {
-    super(props);
+const WalletScreen: React.FC<IWalletScreenProps> = ({
+  balance,
+  transactions,
+  isLoading,
+  getTransactions,
+  changeScreen,
+}) => {
+  const [beginingReached, setBeginingReached] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
+  const [collapse, setCollapse] = useState(false);
+  const [interacting, setInteracting] = useState(false);
+  useEffect(() => {
     if (Platform.OS === 'android') {
       UIManager.setLayoutAnimationEnabledExperimental &&
         UIManager.setLayoutAnimationEnabledExperimental(true);
     }
-    this.state = {
-      beginingReached: true,
-      collapsed: false,
-      interacting: false,
-    };
-  }
+  });
 
-  private onTouch = () => {
-    const { collapsed } = this.state;
-    this.animatedBarAction(!collapsed);
+  const onTouch = () => {
+    animatedBarAction(!collapsed);
   };
 
-  private handleSwipeUp = (event: FlingGestureHandlerStateChangeEvent) => {
-    const { collapsed } = this.state;
+  const handleSwipeUp = (event: FlingGestureHandlerStateChangeEvent) => {
     event.nativeEvent.state === State.ACTIVE &&
       !collapsed &&
-      this.animatedBarAction(true);
+      animatedBarAction(true);
   };
 
-  private handleSwipeDown = (event: FlingGestureHandlerStateChangeEvent) => {
-    const { collapsed } = this.state;
+  const handleSwipeDown = (event: FlingGestureHandlerStateChangeEvent) => {
     event.nativeEvent.state === State.ACTIVE &&
       collapsed &&
-      this.animatedBarAction(false);
+      animatedBarAction(false);
   };
 
-  private animatedBarAction = (collapse: boolean) => {
-    const { interacting } = this.state;
+  const animatedBarAction = (isCollapseAction: boolean) => {
+    setCollapse(isCollapseAction);
     if (!interacting) {
       InteractionManager.runAfterInteractions(() => {
-        this.setState({ interacting: true }, () => {
-          LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-          this.setState({ collapsed: collapse }, () => {
-            setTimeout(() => {
-              this.setState({ interacting: false });
-            }, 500);
-          });
-        });
+        setInteracting(true);
       });
     }
   };
+  useEffect(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+    setCollapsed(collapse);
+  }, [interacting]);
 
-  private onScroll = (e: NativeSyntheticEvent<TextInputScrollEventData>) => {
-    const { collapsed } = this.state;
+  useEffect(() => {
+    setTimeout(() => {
+      setInteracting(false);
+    }, 500);
+  }, [collapse]);
+
+  const onScroll = (e: NativeSyntheticEvent<TextInputScrollEventData>) => {
     const { y } = e.nativeEvent.contentOffset;
     if (y > 0 && !collapsed) {
-      this.animatedBarAction(true);
-      this.setState({ beginingReached: false });
+      animatedBarAction(true);
+      setBeginingReached(false);
     }
   };
 
-  private onScrollEnd = (e: NativeSyntheticEvent<TextInputScrollEventData>) => {
-    const { collapsed } = this.state;
+  const onScrollEnd = (e: NativeSyntheticEvent<TextInputScrollEventData>) => {
     const { y } = e.nativeEvent.contentOffset;
     if (y === 0 && collapsed) {
-      this.animatedBarAction(false);
-      this.setState({ beginingReached: true });
+      animatedBarAction(false);
+      setBeginingReached(true);
     }
   };
 
-  public render() {
-    const { collapsed, beginingReached } = this.state;
-    const {
-      balance,
-      transactions,
-      isLoading,
-      getTransactions,
-      changeScreen,
-    } = this.props;
-    return (
+  return (
+    <FlingGestureHandler
+      direction={Directions.UP}
+      onHandlerStateChange={handleSwipeUp}
+    >
       <FlingGestureHandler
-        direction={Directions.UP}
-        onHandlerStateChange={this.handleSwipeUp}
+        direction={Directions.DOWN}
+        onHandlerStateChange={collapsed ? handleSwipeDown : undefined}
       >
-        <FlingGestureHandler
-          direction={Directions.DOWN}
-          onHandlerStateChange={collapsed ? this.handleSwipeDown : undefined}
-        >
-          <View style={styles.container}>
-            <TopDisplay
-              balance={balance}
-              onPress={this.onTouch}
-              collapsed={collapsed}
-              isAtTop={beginingReached}
-              onPressRefresh={getTransactions}
-              changeScreen={changeScreen}
-            >
-              <TransactionsList
-                transactions={transactions}
-                isLoading={isLoading}
-                getTransactions={getTransactions}
-                onScroll={this.onScroll}
-                onScrollEnd={this.onScrollEnd}
-              />
-            </TopDisplay>
-          </View>
-        </FlingGestureHandler>
+        <View style={styles.container}>
+          <TopDisplay
+            balance={balance}
+            onPress={onTouch}
+            collapsed={collapsed}
+            isAtTop={beginingReached}
+            onPressRefresh={getTransactions}
+            changeScreen={changeScreen}
+          >
+            <TransactionsList
+              transactions={transactions}
+              isLoading={isLoading}
+              getTransactions={getTransactions}
+              onScroll={onScroll}
+              onScrollEnd={onScrollEnd}
+            />
+          </TopDisplay>
+        </View>
       </FlingGestureHandler>
-    );
-  }
-}
+    </FlingGestureHandler>
+  );
+};
 const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
 });
-interface IWalletScreenState {
-  collapsed: boolean;
-  interacting: boolean;
-  beginingReached: boolean;
-}
 
 interface IWalletScreenProps {
   transactions: ITransactionsMap;
