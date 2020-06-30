@@ -16,29 +16,26 @@ import {
   State,
 } from 'react-native-gesture-handler';
 
-import { Dispatch } from 'redux';
-import { connect } from 'react-redux';
 import { TopDisplay } from '../components';
 import {
   transactionsSelectors,
   transactionsActions,
 } from '../store/transactions';
-import { IRootState } from '../store/reducers';
-import { ITransactionsMap } from '../store/transactions/types';
 import TransactionsList from '../components/TransactionsList';
-import { Screen } from '../App';
+import { Screen } from "../App";
+import { useDispatch } from "react-redux";
 
 const WalletScreen: React.FC<IWalletScreenProps> = ({
-  balance,
-  transactions,
-  isLoading,
-  getTransactions,
   changeScreen,
 }) => {
   const [beginingReached, setBeginingReached] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [collapse, setCollapse] = useState(false);
   const [interacting, setInteracting] = useState(false);
+  const transactions = transactionsSelectors.getTransactions();
+  const balance = transactionsSelectors.getBalance();
+  const isLoading = transactionsSelectors.isLoading();
+  const dispatch = useDispatch();
   useEffect(() => {
     if (Platform.OS === 'android') {
       UIManager.setLayoutAnimationEnabledExperimental &&
@@ -46,45 +43,50 @@ const WalletScreen: React.FC<IWalletScreenProps> = ({
     }
   });
 
+  const getTransactions = () => {
+    dispatch(transactionsActions.requestTransactions());
+  };
+
   const onTouch = () => {
-    animatedBarAction(!collapsed);
+    animateBar(!collapsed);
   };
 
   const handleSwipeUp = (event: FlingGestureHandlerStateChangeEvent) => {
-    event.nativeEvent.state === State.ACTIVE &&
-      !collapsed &&
-      animatedBarAction(true);
+    event.nativeEvent.state === State.ACTIVE && !collapsed && animateBar(true);
   };
 
   const handleSwipeDown = (event: FlingGestureHandlerStateChangeEvent) => {
-    event.nativeEvent.state === State.ACTIVE &&
-      collapsed &&
-      animatedBarAction(false);
+    event.nativeEvent.state === State.ACTIVE && collapsed && animateBar(false);
   };
 
-  const animatedBarAction = (isCollapseAction: boolean) => {
-    setCollapse(isCollapseAction);
+  const animateBar = (isCollapsing: boolean) => {
+    setCollapse(isCollapsing);
     if (!interacting) {
+      // waits any interaction to finish
+      // before starting the collapse animation
       InteractionManager.runAfterInteractions(() => {
         setInteracting(true);
       });
     }
   };
+  // Bar animation and interaction starts
+  // No other animations should be executed during this
   useEffect(() => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setCollapsed(collapse);
   }, [interacting]);
-
+  // Bar animation and interaction finishes
+  // Interaction flag set to false
   useEffect(() => {
     setTimeout(() => {
-      setInteracting(false);
+      interacting && setInteracting(false);
     }, 500);
-  }, [collapse]);
+  }, [collapsed]);
 
   const onScroll = (e: NativeSyntheticEvent<TextInputScrollEventData>) => {
     const { y } = e.nativeEvent.contentOffset;
     if (y > 0 && !collapsed) {
-      animatedBarAction(true);
+      animateBar(true);
       setBeginingReached(false);
     }
   };
@@ -92,7 +94,7 @@ const WalletScreen: React.FC<IWalletScreenProps> = ({
   const onScrollEnd = (e: NativeSyntheticEvent<TextInputScrollEventData>) => {
     const { y } = e.nativeEvent.contentOffset;
     if (y === 0 && collapsed) {
-      animatedBarAction(false);
+      animateBar(false);
       setBeginingReached(true);
     }
   };
@@ -135,23 +137,7 @@ const styles = StyleSheet.create({
 });
 
 interface IWalletScreenProps {
-  transactions: ITransactionsMap;
-  isLoading: boolean;
-  balance: number;
-  getTransactions: () => void;
   changeScreen: (screen: Screen) => void;
 }
 
-const mapStateToProps = (state: IRootState) => ({
-  balance: transactionsSelectors.getBalance(state),
-  transactions: transactionsSelectors.getTransactions(state),
-  isLoading: transactionsSelectors.isLoading(state),
-});
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  getTransactions: () => {
-    dispatch(transactionsActions.requestTransactions());
-  },
-});
-
-export default connect(mapStateToProps, mapDispatchToProps)(WalletScreen);
+export default WalletScreen;

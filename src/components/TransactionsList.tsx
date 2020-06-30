@@ -16,6 +16,8 @@ import { colors } from '../assets';
 import { ITransaction } from '../services/api';
 import { ITransactionsMap } from '../store/transactions/types';
 
+const keyExtractor = (item: ITransaction) => item.id.toString();
+
 const TransactionsList: React.FC<ITransactionsListProps> = ({
   getTransactions,
   transactions,
@@ -46,8 +48,6 @@ const TransactionsList: React.FC<ITransactionsListProps> = ({
       </View>
     );
   };
-
-  const keyExtractor = (item: ITransaction) => item.id.toString();
   const processTransactions = () => {
     const transactionsList: ITransaction[] = [];
     Object.keys(transactions).forEach((key: string) => {

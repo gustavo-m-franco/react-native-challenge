@@ -17,6 +17,40 @@ import PlusIcon from '../assets/icons/PlusIcon';
 import RefreshIcon from '../assets/icons/RefreshIcon';
 import { Screen } from '../App';
 
+const pan = new Animated.ValueXY();
+const scaleX = new Animated.Value(1);
+const scaleY = new Animated.Value(1);
+const panMover = Animated.event([
+  null,
+  {
+    dy: pan.y,
+  },
+]);
+const maxDrag = 170;
+const panResponder = PanResponder.create({
+  onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 0,
+  onPanResponderMove: (_, gesture) => {
+    if (gesture.dy < 0 || gesture.dy > maxDrag) {
+      return false;
+    }
+    scaleX.setValue(1 + gesture.dy / maxDrag);
+    scaleY.setValue(1 + gesture.dy / maxDrag);
+    // tslint:disable-next-line: no-void-expression
+    return panMover(_, gesture);
+  },
+  onPanResponderRelease: () => {
+    Animated.parallel([
+      Animated.spring(pan, { toValue: { x: 0, y: 0 } }),
+      Animated.spring(scaleX, { toValue: 1 }),
+      Animated.spring(scaleY, { toValue: 1 }),
+    ]).start();
+  },
+});
+
+const panStyle = {
+  transform: pan.getTranslateTransform(),
+};
+
 export const TopDisplay: React.FC<PropsWithChildren<ITopDisplayProps>> = ({
   collapsed,
   isAtTop,
@@ -26,42 +60,8 @@ export const TopDisplay: React.FC<PropsWithChildren<ITopDisplayProps>> = ({
   balance,
   changeScreen,
 }) => {
-  const pan = new Animated.ValueXY();
-  const scaleX = new Animated.Value(1);
-  const scaleY = new Animated.Value(1);
-  const panMover = Animated.event([
-    null,
-    {
-      dy: pan.y,
-    },
-  ]);
-  const maxDrag = 170;
-  const panResponder = PanResponder.create({
-    onMoveShouldSetPanResponder: (_, gesture) => gesture.dy > 0,
-    onPanResponderMove: (_, gesture) => {
-      if (gesture.dy < 0 || gesture.dy > maxDrag) {
-        return false;
-      }
-      scaleX.setValue(1 + gesture.dy / maxDrag);
-      scaleY.setValue(1 + gesture.dy / maxDrag);
-      // tslint:disable-next-line: no-void-expression
-      return panMover(_, gesture);
-    },
-    onPanResponderRelease: () => {
-      Animated.parallel([
-        Animated.spring(pan, { toValue: { x: 0, y: 0 } }),
-        Animated.spring(scaleX, { toValue: 1 }),
-        Animated.spring(scaleY, { toValue: 1 }),
-      ]).start();
-    },
-  });
-
   const onPressAdd = () => {
     changeScreen(Screen.ADD_TRANSACTION_SCREEN);
-  };
-
-  const panStyle = {
-    transform: pan.getTranslateTransform(),
   };
   return (
     <View style={[styles.container, collapsed && styles.collapsedContainer]}>

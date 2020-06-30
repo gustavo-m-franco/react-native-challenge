@@ -1,9 +1,7 @@
-import React, { useState } from 'react';
-import { Dispatch } from 'redux';
-import { connect } from 'react-redux';
+import React from 'react';
+import { useDispatch } from 'react-redux';
 import { View } from 'react-native';
 import { TouchableOpacity } from 'react-native-gesture-handler';
-import { IRootState } from '../store/reducers';
 import AddTransactionFormContainer, {
   IAddTransaction,
 } from '../components/addTransaction/AddTransactionFormContainer';
@@ -12,20 +10,22 @@ import { Screen } from '../App';
 import LeftChevron from '../assets/icons/LeftChevron';
 
 const AddTransactionScreen: React.FC<IAddTransactionScreenProps> = ({
-  addTransaction,
   changeScreen,
 }) => {
+  const dispatch = useDispatch();
   const handleSubmit = (values: IAddTransaction) => {
     return new Promise((resolve, reject) => {
       const successCallback = () => {
         resolve();
         onPressBack();
       };
-      addTransaction({
-        ...values,
-        successCallback,
-        errorCallback: reject,
-      });
+      dispatch(
+        transactionsActions.addTransaction({
+          ...values,
+          successCallback,
+          errorCallback: reject,
+        }),
+      );
     });
   };
   const onPressBack = () => {
@@ -44,28 +44,8 @@ const AddTransactionScreen: React.FC<IAddTransactionScreenProps> = ({
   );
 };
 
-interface IAddTransactionsSubmission {
-  amount: string;
-  counterparty: string;
-  category: string;
-  successCallback: () => void;
-  errorCallback: () => void;
-}
 interface IAddTransactionScreenProps {
-  isLoading: boolean;
-  addTransaction: (data: IAddTransactionsSubmission) => void;
   changeScreen: (screen: Screen) => void;
 }
 
-const mapStateToProps = (state: IRootState) => ({});
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  addTransaction: (data: IAddTransactionsSubmission) => {
-    dispatch(transactionsActions.addTransaction(data));
-  },
-});
-
-export default connect(
-  mapStateToProps,
-  mapDispatchToProps,
-)(AddTransactionScreen);
+export default AddTransactionScreen;

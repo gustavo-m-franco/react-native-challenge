@@ -1,47 +1,26 @@
 import React from 'react';
-import { connect } from 'react-redux';
-import { Dispatch } from 'redux';
+import { useDispatch } from 'react-redux';
 
 import ToastComponent from '../components/Toast';
-import { IRootState } from '../store/reducers';
 import notificationActions from '../store/notification/actions';
-import { NotificationTypes } from '../store/notification/types';
+import { notificationSelecors } from '../store/notification';
 
-export const ToastContainer: React.FunctionComponent<IToastProps> = ({
-  title,
-  message,
-  type,
-  show,
-  hide,
-}) => (
-  <ToastComponent
-    hide={hide}
-    show={show}
-    title={title}
-    message={message}
-    type={type}
-  />
-);
-
-export interface IToastProps {
-  title?: string;
-  message: string;
-  type: NotificationTypes;
-  show: boolean;
-  hide: () => void;
-}
-
-const mapStateToProps = (state: IRootState) => ({
-  title: state.notification.title,
-  message: state.notification.message,
-  type: state.notification.type,
-  show: state.notification.show,
-});
-
-const mapDispatchToProps = (dispatch: Dispatch) => ({
-  hide: () => {
+export const ToastContainer: React.FunctionComponent = () => {
+  const dispatch = useDispatch();
+  const hide = () => {
     dispatch(notificationActions.dismiss());
-  },
-});
+  };
+  const notification = notificationSelecors.withNotification();
+  const { title, message, type, show } = notification;
+  return (
+    <ToastComponent
+      hide={hide}
+      show={show}
+      title={title}
+      message={message}
+      type={type}
+    />
+  );
+};
 
-export default connect(mapStateToProps, mapDispatchToProps)(ToastContainer);
+export default ToastContainer;

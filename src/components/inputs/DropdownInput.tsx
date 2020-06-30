@@ -14,7 +14,7 @@ export const DropdownInputComponent: React.FC<IDropdownInputProps> = ({
   meta,
   options,
 }) => {
-  const view = useRef<View | undefined>(undefined) as React.MutableRefObject<
+  const viewRef = useRef<View | undefined>(undefined) as React.MutableRefObject<
     View
   >;
   const [showOptions, setShowOptions] = useState(false);
@@ -26,8 +26,8 @@ export const DropdownInputComponent: React.FC<IDropdownInputProps> = ({
   }, [showOptions, posY]);
 
   const measure = () => {
-    if (view.current) {
-      view.current.measureInWindow((x, positionY) => {
+    if (viewRef.current) {
+      viewRef.current.measureInWindow((x, positionY) => {
         if (positionY) {
           setPosY(positionY + 30);
         }
@@ -60,7 +60,7 @@ export const DropdownInputComponent: React.FC<IDropdownInputProps> = ({
 
   const displayError = meta.invalid && meta.touched;
   return (
-    <View ref={view} style={styles.container} collapsable={false}>
+    <View ref={viewRef} style={styles.container} collapsable={false}>
       <DropdownOptions
         select={selectOption}
         options={options}

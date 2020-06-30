@@ -23,36 +23,37 @@ interface IField {
   options?: typeof Category;
 }
 
+const fields: IField[] = [
+  {
+    name: 'amount',
+    validate: [required],
+    component: MoneyInput,
+    label: 'Amount',
+    placeholder: `${CURRENCY_SYMBOL}0.00`,
+  },
+  {
+    name: 'counterparty',
+    validate: [required],
+    component: Input,
+    label: 'Counterparty',
+    placeholder: `(eg.Sainsbury's)`,
+  },
+  {
+    name: 'category',
+    validate: [required],
+    component: DropdownInputComponent,
+    label: 'Category',
+    placeholder: 'Select a category',
+    options: Category,
+  },
+];
+
 export const AddTransactionForm: React.FC<IAddTransactionFormProps> = ({
   error,
   isLoading,
   onSubmit,
   canSubmit,
 }) => {
-  const fields: IField[] = [
-    {
-      name: 'amount',
-      validate: [required],
-      component: MoneyInput,
-      label: 'Amount',
-      placeholder: `${CURRENCY_SYMBOL}0.00`,
-    },
-    {
-      name: 'counterparty',
-      validate: [required],
-      component: Input,
-      label: 'Counterparty',
-      placeholder: `(eg.Sainsbury's)`,
-    },
-    {
-      name: 'category',
-      validate: [required],
-      component: DropdownInputComponent,
-      label: 'Category',
-      placeholder: 'Select a category',
-      options: Category,
-    },
-  ];
   return (
     <ScrollView contentContainerStyle={styles.formConatiner}>
       <Title marginBottom={16} marginTop={0} text="Add a transaction" />
