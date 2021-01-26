@@ -16,18 +16,16 @@ import {
   State,
 } from 'react-native-gesture-handler';
 
+import { useDispatch } from 'react-redux';
 import { TopDisplay } from '../components';
 import {
   transactionsSelectors,
   transactionsActions,
 } from '../store/transactions';
 import TransactionsList from '../components/TransactionsList';
-import { Screen } from "../App";
-import { useDispatch } from "react-redux";
+import { Screen } from '../App';
 
-const WalletScreen: React.FC<IWalletScreenProps> = ({
-  changeScreen,
-}) => {
+const WalletScreen: React.FC<IWalletScreenProps> = ({ changeScreen }) => {
   const [beginingReached, setBeginingReached] = useState(true);
   const [collapsed, setCollapsed] = useState(false);
   const [collapse, setCollapse] = useState(false);

@@ -8,7 +8,11 @@ export const Balance: React.FunctionComponent<IBalanceProps> = ({
   balance,
   style,
 }) => {
-  return <Text style={[styles.balance, style]}>{format.toPrice(balance)}</Text>;
+  return (
+    <Text style={[styles.balance, style]} testID="balance-display">
+      {format.toPrice(balance)}
+    </Text>
+  );
 };
 
 export interface IBalanceProps {

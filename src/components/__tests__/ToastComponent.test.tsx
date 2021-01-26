@@ -1,17 +1,17 @@
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
+import { fireEvent, render, RenderAPI } from '@testing-library/react-native';
 
 import ToastComponent, { IToastProps } from '../Toast';
 import { NotificationTypes } from '../../store/notification';
 
 describe('ToastComponent', () => {
   jest.useFakeTimers();
-  let toast: ShallowWrapper;
+  let toast: RenderAPI;
   const title = 'Test title';
   const message = 'Test message';
   const type = NotificationTypes.ERROR;
   const show = false;
-  let hide: () => void;
+  let hide: jest.MockedFunction<() => void>;
   let toastProps: IToastProps;
   beforeEach(() => {
     hide = jest.fn(() => {});
@@ -22,35 +22,43 @@ describe('ToastComponent', () => {
       type,
       show,
     };
-    toast = shallow(<ToastComponent {...toastProps} />);
-  });
-  it('+++ Should render one text component.', () => {
-    jest.runAllTimers();
-    expect(toast.find('Text')).toHaveLength(1);
-    const text = toast.find('Text').prop('children');
-    expect(text).toBe(message);
+    toast = render(<ToastComponent {...toastProps} />);
   });
   it('+++ Should not call hide function.', () => {
     jest.runAllTimers();
     expect(hide).toHaveBeenCalledTimes(0);
   });
+  it('+++ Should call hide function message shows', async () => {
+    const { rerender } = toast;
+    const newProps = {
+      ...toastProps,
+      title,
+      show: true,
+    };
+    rerender(<ToastComponent {...newProps} />);
+    jest.runAllTimers();
+    expect(hide).toHaveBeenCalledTimes(1);
+  });
   it('+++ Should render title if title is provided.', () => {
+    const { queryAllByText, rerender } = toast;
     const newProps = {
       ...toastProps,
       title,
     };
-    toast.setProps(newProps);
-    const text = toast.find('Text');
-    expect(text).toHaveLength(2);
-    expect(text.at(0).prop('children')).toBe(title);
+    expect(queryAllByText(title)).toHaveLength(0);
+
+    rerender(<ToastComponent {...newProps} />);
+    expect(queryAllByText(title)).toHaveLength(1);
   });
-  it('+++ Should call hide function some time after show changes to true.', () => {
+  it('+++ Should call hide function when cta is pressed', () => {
+    const { getByText, rerender } = toast;
     const newProps = {
       ...toastProps,
       show: true,
     };
-    toast.setProps(newProps);
-    jest.runAllTimers();
+    rerender(<ToastComponent {...newProps} />);
+    const messageComponent = getByText(message);
+    fireEvent.press(messageComponent);
     expect(hide).toHaveBeenCalledTimes(1);
   });
 });

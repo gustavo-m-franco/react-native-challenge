@@ -119,13 +119,20 @@ Enhancements:
 * (DONE) WalletScreen refactor interaction 
 * (DONE) Extract functions out of scope to prevent rerenders
 * Alphabetize
-* Redux hooks
+* (DONE) Redux hooks
 * Hooks typescript
 * Update npm
+    * Upgrade react-native
 * Thunks
-* UTs
-* Integration tests
+* UTs 
+* https://github.com/callstack/react-native-testing-library
+* Integration tests (mock redux)
 * Test hooks
 * Test sagas
 * Test selectors
-* Test sagas
+* Redux forms
+* Fetch mock
+* Analytics
+* Crash reports
+* Splash screen
+* Icon image

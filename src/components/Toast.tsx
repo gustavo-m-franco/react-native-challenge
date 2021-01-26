@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   View,
   Text,
@@ -22,7 +22,7 @@ const ToastComponent: React.FunctionComponent<IToastProps> = ({
   message,
 }) => {
   const bounceValue = new Animated.Value(0);
-  useEffect(() => {
+  React.useEffect(() => {
     animateNotification(show);
   }, [show]);
   const animateNotification = (showArg: boolean) => {
@@ -72,11 +72,11 @@ const ToastComponent: React.FunctionComponent<IToastProps> = ({
                 {title}
               </Text>
             )}
-            <Text onPress={startHide} style={styles.text}>
+            <Text testID="message" onPress={startHide} style={styles.text}>
               {message}
             </Text>
           </View>
-          <TouchableOpacity onPress={startHide}>
+          <TouchableOpacity testID="hide-cta" onPress={startHide}>
             <CloseIcon style={styles.closeIcon} />
           </TouchableOpacity>
         </View>

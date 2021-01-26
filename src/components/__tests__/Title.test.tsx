@@ -1,10 +1,10 @@
 import React from 'react';
-import { shallow, ShallowWrapper } from 'enzyme';
+import { render, RenderAPI } from '@testing-library/react-native';
 
 import Title, { ITitleProps } from '../Title';
 
 describe('Title', () => {
-  let title: ShallowWrapper;
+  let title: RenderAPI;
   const description = 'Description Test';
   const text = 'Text Test';
   const titleProps: ITitleProps = {
@@ -12,20 +12,16 @@ describe('Title', () => {
     text,
   };
   beforeEach(() => {
-    title = shallow(<Title {...titleProps} />);
+    title = render(<Title {...titleProps} />);
   });
-  it('+++ Should render the text', () => {
-    const textComp = title
-      .findWhere(node => node.prop('testID') === 'text')
-      .shallow();
-    expect(textComp).toHaveLength(1);
-    expect(textComp.prop('children')).toBe(text);
+  it('+++ Should render the text and description', () => {
+    const { getByTestId } = title;
+    expect(getByTestId('text').children[0]).toBe(text);
+    expect(getByTestId('description').children[0]).toBe(description);
   });
-  it('+++ Should render a description ', () => {
-    const descriptionComp = title
-      .findWhere(node => node.prop('testID') === 'description')
-      .shallow();
-    expect(descriptionComp).toHaveLength(1);
-    expect(descriptionComp.prop('children')).toBe(description);
+  it('+++ Should not render the description', () => {
+    const { queryByTestId, rerender } = title;
+    rerender(<Title text="Text" />);
+    expect(queryByTestId('description')).toBeNull();
   });
 });

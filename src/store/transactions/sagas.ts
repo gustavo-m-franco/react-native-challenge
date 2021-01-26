@@ -7,9 +7,7 @@ import {
   addTransaction,
   ITransaction,
 } from '../../services/api/index';
-import transactionsActions, {
-  IAddTransactionPayload,
-} from './actions';
+import transactionsActions, { IAddTransactionPayload } from './actions';
 import { notificationActions } from '../notification';
 import { CURRENCY_SYMBOL } from '../../services/format';
 
